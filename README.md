@@ -17,6 +17,9 @@ plans an AI agent proposes are safe to run *before* they reach Spark:
 This is the reference implementation behind the
 [Project Osmos case study](https://aiwithjen.com/work/project-osmos).
 
+**[▶ Try the live demo](https://prompt-ops-eval-harness.streamlit.app)**: inject a
+hallucination, simulate schema drift, and inspect the plan, PySpark, and self-healing diff.
+
 > **Scope:** execution is **simulated**. The harness ships with a sample catalog and a
 > deterministic runtime that reproduces real failure shapes (hallucinated columns,
 > type drift, unapproved destructive writes), so evals run offline and in CI with no
