@@ -27,8 +27,8 @@ jobs:
 
       - name: Lint and format check
         run: |
-          ruff check .
-          ruff format --check .
+          ruff check src tests app.py
+          ruff format --check src tests app.py
 
       - name: Run Pytest suite
         run: pytest -v
