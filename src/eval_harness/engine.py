@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
+from typing import ClassVar
 
 from .contracts import (
     AgentExecutionState,
@@ -65,9 +66,7 @@ class LakehouseCatalogResolver:
         try:
             return self.catalog[lakehouse][table]
         except KeyError:
-            raise GroundingError(
-                f"Unknown table {lakehouse}.{table}", [f"{lakehouse}.{table}"]
-            ) from None
+            raise GroundingError(f"Unknown table {lakehouse}.{table}", [f"{lakehouse}.{table}"]) from None
 
     def unknown_columns(self, lakehouse: str, table: str, columns: list[str]) -> list[str]:
         known = self.schema(lakehouse, table)
@@ -75,10 +74,15 @@ class LakehouseCatalogResolver:
 
     def ground(self, plan: LakehouseExecutionPlan) -> None:
         unknown = self.unknown_columns(plan.target_lakehouse, plan.target_table, plan.columns)
+        schema = self.schema(plan.target_lakehouse, plan.target_table)
         for a in plan.assertions:
-            if a.column and a.column not in plan.columns and a.column not in unknown:
-                if a.column not in self.schema(plan.target_lakehouse, plan.target_table):
-                    unknown.append(a.column)
+            if (
+                a.column
+                and a.column not in plan.columns
+                and a.column not in unknown
+                and a.column not in schema
+            ):
+                unknown.append(a.column)
         if unknown:
             raise GroundingError(
                 f"Hallucinated column(s) for {plan.qualified_table}: {', '.join(unknown)}",
@@ -147,7 +151,12 @@ def render_pyspark(plan: LakehouseExecutionPlan, casts: dict[str, str] | None = 
             expr = f'{expr}.cast("{casts[c]}")'
         select.append(f'{expr}.alias("{c}")' if c in casts else expr)
     lines.append(f"df = df.select({', '.join(select)})")
-    spark_mode = {"append": "append", "merge": "append", "overwrite": "overwrite", "drop_partition": "overwrite"}
+    spark_mode = {
+        "append": "append",
+        "merge": "append",
+        "overwrite": "overwrite",
+        "drop_partition": "overwrite",
+    }
     lines.append(
         f'df.write.format("delta").mode("{spark_mode[plan.write_mode.value]}")'
         f'.saveAsTable("{plan.qualified_table}")'
@@ -171,7 +180,9 @@ class SelfHealingInterceptor:
         self.resolver = resolver
         self.max_attempts = max_attempts
 
-    def remediate(self, plan: LakehouseExecutionPlan, err: SparkTypeMismatch, attempt: int) -> AgentRecoveryEnvelope:
+    def remediate(
+        self, plan: LakehouseExecutionPlan, err: SparkTypeMismatch, attempt: int
+    ) -> AgentRecoveryEnvelope:
         expected = self.resolver.schema(plan.target_lakehouse, plan.target_table).get(err.column)
         if expected is None:
             return AgentRecoveryEnvelope(
@@ -207,7 +218,12 @@ class SimulatedLakehouseRuntime:
     """
 
     # Capacity Unit cost model (illustrative, deterministic)
-    BASE_CU = {"append": 2.0, "merge": 4.0, "overwrite": 5.0, "drop_partition": 3.0}
+    BASE_CU: ClassVar[dict[str, float]] = {
+        "append": 2.0,
+        "merge": 4.0,
+        "overwrite": 5.0,
+        "drop_partition": 3.0,
+    }
     PER_COLUMN_CU = 0.25
 
     def __init__(self, resolver: LakehouseCatalogResolver, interceptor: SelfHealingInterceptor):
@@ -262,4 +278,6 @@ class SimulatedLakehouseRuntime:
                 break
             casts[envelope.remediation.column] = envelope.remediation.to_type
 
-        return ExecutionResult(AgentExecutionState.FAILED, render_pyspark(plan, casts), attempt, cu, envelopes)
+        return ExecutionResult(
+            AgentExecutionState.FAILED, render_pyspark(plan, casts), attempt, cu, envelopes
+        )

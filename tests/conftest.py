@@ -1,9 +1,9 @@
 import pytest
 
 from eval_harness import (
+    SAMPLE_CATALOG,
     AgenticIntentCompiler,
     LakehouseCatalogResolver,
-    SAMPLE_CATALOG,
     SelfHealingInterceptor,
     SimulatedLakehouseRuntime,
 )

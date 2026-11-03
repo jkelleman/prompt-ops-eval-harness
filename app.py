@@ -10,14 +10,14 @@ import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-from eval_harness import (  # noqa: E402
+from eval_harness import (
+    DEFAULT_SUITE,
+    SAMPLE_CATALOG,
     AgenticIntentCompiler,
     ApprovalRequiredError,
-    DEFAULT_SUITE,
     GroundingError,
     IntentCompilationError,
     LakehouseCatalogResolver,
-    SAMPLE_CATALOG,
     SelfHealingInterceptor,
     SimulatedLakehouseRuntime,
     build_evaluator,

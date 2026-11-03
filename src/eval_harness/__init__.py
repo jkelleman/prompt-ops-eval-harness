@@ -22,11 +22,12 @@ from .evaluator import EvalCase, EvalReport, PromptOpsEvaluator
 from .scenarios import DEFAULT_SUITE, SAMPLE_CATALOG, build_evaluator
 
 __all__ = [
+    "DEFAULT_SUITE",
+    "SAMPLE_CATALOG",
     "AgentExecutionState",
     "AgentRecoveryEnvelope",
     "AgenticIntentCompiler",
     "ApprovalRequiredError",
-    "DEFAULT_SUITE",
     "EvalCase",
     "EvalReport",
     "GroundingError",
@@ -36,7 +37,6 @@ __all__ = [
     "PreCommitAssertion",
     "PromptOpsEvaluator",
     "RemediationAction",
-    "SAMPLE_CATALOG",
     "SelfHealingInterceptor",
     "SimulatedLakehouseRuntime",
     "WriteMode",

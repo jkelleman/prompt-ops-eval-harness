@@ -2,9 +2,9 @@ import pytest
 from pydantic import ValidationError
 
 from eval_harness import (
+    DEFAULT_SUITE,
     AgentExecutionState,
     ApprovalRequiredError,
-    DEFAULT_SUITE,
     GroundingError,
     LakehouseExecutionPlan,
     PreCommitAssertion,
@@ -14,14 +14,14 @@ from eval_harness import (
 
 
 def _plan(**overrides):
-    data = dict(
-        task_id="t1",
-        target_lakehouse="sales_lh",
-        target_table="orders_daily",
-        write_mode=WriteMode.APPEND,
-        columns=["order_id"],
-        assertions=[PreCommitAssertion(name="rows", kind="row_count_min", threshold=1)],
-    )
+    data = {
+        "task_id": "t1",
+        "target_lakehouse": "sales_lh",
+        "target_table": "orders_daily",
+        "write_mode": WriteMode.APPEND,
+        "columns": ["order_id"],
+        "assertions": [PreCommitAssertion(name="rows", kind="row_count_min", threshold=1)],
+    }
     data.update(overrides)
     return LakehouseExecutionPlan(**data)
 

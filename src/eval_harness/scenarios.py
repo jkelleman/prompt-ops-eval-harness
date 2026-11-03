@@ -38,16 +38,38 @@ SAMPLE_CATALOG: Catalog = {
 
 DEFAULT_SUITE: list[EvalCase] = [
     # Grounded plans that should run cleanly
-    EvalCase("append-orders", "append into sales_lh.orders_daily columns order_id, order_date, net_amount", "verified"),
+    EvalCase(
+        "append-orders",
+        "append into sales_lh.orders_daily columns order_id, order_date, net_amount",
+        "verified",
+    ),
     EvalCase("merge-customers", "merge into sales_lh.customers columns customer_id, segment", "verified"),
     EvalCase("append-telemetry", "append into telemetry_lh.device_events", "verified"),
     # Hallucinated columns the contract layer must reject
-    EvalCase("hallucinated-revenue", "append into sales_lh.orders_daily columns order_id, gross_revenue", "reject_hallucination"),
-    EvalCase("hallucinated-churn", "merge into sales_lh.customers columns customer_id, churn_score", "reject_hallucination"),
-    EvalCase("hallucinated-table", "append into sales_lh.order_lines columns order_id", "reject_hallucination"),
+    EvalCase(
+        "hallucinated-revenue",
+        "append into sales_lh.orders_daily columns order_id, gross_revenue",
+        "reject_hallucination",
+    ),
+    EvalCase(
+        "hallucinated-churn",
+        "merge into sales_lh.customers columns customer_id, churn_score",
+        "reject_hallucination",
+    ),
+    EvalCase(
+        "hallucinated-table", "append into sales_lh.order_lines columns order_id", "reject_hallucination"
+    ),
     # Destructive writes must stop at the guardrail gate
-    EvalCase("overwrite-unapproved", "overwrite into sales_lh.orders_daily columns order_id, order_date", "requires_approval"),
-    EvalCase("drop-partition-unapproved", "drop partition on telemetry_lh.device_events columns event_id partition event_ts", "requires_approval"),
+    EvalCase(
+        "overwrite-unapproved",
+        "overwrite into sales_lh.orders_daily columns order_id, order_date",
+        "requires_approval",
+    ),
+    EvalCase(
+        "drop-partition-unapproved",
+        "drop partition on telemetry_lh.device_events columns event_id partition event_ts",
+        "requires_approval",
+    ),
     # Schema drift that self-healing should repair
     EvalCase(
         "drift-order-date",

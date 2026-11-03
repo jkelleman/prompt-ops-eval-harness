@@ -90,7 +90,9 @@ class EvalReport:
 
 
 class PromptOpsEvaluator:
-    def __init__(self, compiler: AgenticIntentCompiler, runtime: SimulatedLakehouseRuntime, cu_budget: float = 25.0):
+    def __init__(
+        self, compiler: AgenticIntentCompiler, runtime: SimulatedLakehouseRuntime, cu_budget: float = 25.0
+    ):
         self.compiler = compiler
         self.runtime = runtime
         self.cu_budget = cu_budget
@@ -114,7 +116,9 @@ class PromptOpsEvaluator:
             return CaseResult(case, case.expect == "requires_approval", f"blocked: {e}")
 
         if case.expect == "requires_approval":
-            return CaseResult(case, False, "destructive write ran without approval", result.attempts, result.cu_used)
+            return CaseResult(
+                case, False, "destructive write ran without approval", result.attempts, result.cu_used
+            )
 
         ok = result.state is AgentExecutionState.VERIFIED
         return CaseResult(
